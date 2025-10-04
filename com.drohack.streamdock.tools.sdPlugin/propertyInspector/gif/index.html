@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Drohack's Tools - Gif</title>
+  <link rel="stylesheet" href="../../static/css/sdpi.css" />
+  <script src="../../static/utils/common.js"></script>
+  <script src="../../static/action.js"></script>
+  <script src="index.js" defer></script>
+</head>
+
+<body>
+  <div class="sdpi-wrapper">
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">GIF Mode</div>
+      <div class="sdpi-item-value">
+        <span class="sdpi-item-child">
+          <input id="random" type="radio" name="gif_mode" value="random" checked>
+          <label for="random"><span></span>Random</label>
+        </span>
+        <span class="sdpi-item-child">
+          <input id="order" type="radio" name="gif_mode" value="order">
+          <label for="order"><span></span>Order</label>
+        </span>
+        <span class="sdpi-item-child">
+          <input id="shuffle" type="radio" name="gif_mode" value="shuffle">
+          <label for="shuffle"><span></span>Shuffle</label>
+        </span>
+        <span class="sdpi-item-child">
+          <input id="static" type="radio" name="gif_mode" value="static">
+          <label for="static"><span></span>Static</label>
+        </span>
+      </div>
+    </div>
+
+    <div class="sdpi-item" id="gif-select-container" style="display: none;">
+      <div class="sdpi-item-label">Select GIF</div>
+      <div class="sdpi-item-value">
+        <select id="selected_gif">
+          <option value="">Loading...</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

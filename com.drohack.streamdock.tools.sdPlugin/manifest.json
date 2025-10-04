@@ -1,0 +1,65 @@
+{
+  "Actions": [
+    {
+      "UUID": "com.drohack.streamdock.tools.volume",
+      "state": 0,
+      "States": [
+        {
+          "TitleAlignment": "center",
+          "FontSize": "16"
+        }
+      ],
+      "Settings": {},
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": [
+        "Keypad",
+        "Information",
+		"Knob"
+      ],
+      "Name": "Volume",
+      "Tooltip": "volume",
+      "PropertyInspectorPath": "./propertyInspector/volume/index.html",
+	  "Icon": "static/img/volume-icon.png"
+    },
+	{
+      "UUID": "com.drohack.streamdock.tools.gif",
+      "state": 0,
+      "States": [
+        {
+          "TitleAlignment": "center",
+          "FontSize": "16"
+        }
+      ],
+      "Settings": {},
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": [
+        "Keypad",
+        "Information"
+      ],
+      "Name": "Gif",
+      "Tooltip": "Gif",
+      "PropertyInspectorPath": "./propertyInspector/gif/index.html",
+	  "Icon": "static/img/gif-icon.png"
+    }
+  ],
+  "Version": "0.0.1",
+  "Name": "Drohack's Tools",
+  "CategoryIcon": "static/img/App-logo.png",
+  "Category": "Drohack's Tools",
+  "Description": "Drohack's Tools",
+  "CodePath": "DrohackPlugin.exe",
+  "SDKVersion": 1,
+  "Author": "Drohack",
+  "URL": "",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "7"
+    }
+  ],
+  "Software": {  
+    "MinimumVersion": "2.9"  
+  }
+}
