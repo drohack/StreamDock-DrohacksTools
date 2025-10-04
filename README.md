@@ -1,6 +1,10 @@
-# Python SDK
+# Drohack's Tools for StreamDock
 
-This is a Python SDK for developing Stream Dock plugins, providing simple and easy-to-use API interfaces and a complete development toolchain. It implements real-time communication with Stream Dock software through WebSocket.
+This is buit on top of the example plugin here: https://github.com/MiraboxSpace/StreamDock-Plugin-SDK/tree/main/SDPythonSDK
+It has 2 tools working in Windows:
+
+- Volume: Button or Knob, shows the current master volume of Windows, using the background fill & actual number. When pressed mutes master volume, and knob rotation increases/decreases volume in increments of 5.
+- Gif: Plays gifs on a button, gifs put in the /static/gifs/ folder, resizes them to 72x72. Can play Random, Shuffle (plays though all randomly without repeats), in Order (all 3 rotate every 30 seconds), or a Static gif where you choose one to play on loop.
 
 ## Features
 
