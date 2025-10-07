@@ -57,8 +57,14 @@ class Volume(Action):
         img_str = base64.b64encode(buffer.getvalue()).decode()
         return f"data:image/png;base64,{img_str}"
 
+    def get_volume_interface(self):
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        return interface.QueryInterface(IAudioEndpointVolume)
+
     def update_volume_display(self):
         try:
+            self.volume = self.get_volume_interface()  # refresh in case device changed
             current_volume = int(round(self.volume.GetMasterVolumeLevelScalar() * 100))
             is_muted = self.volume.GetMute()
 
@@ -96,6 +102,7 @@ class Volume(Action):
     def change_volume_percent(self, delta_percent: int):
         """Change volume by delta_percent (integer percent)."""
         try:
+            self.volume = self.get_volume_interface()  # refresh in case device changed
             # Read current percent (rounded)
             current = self.volume.GetMasterVolumeLevelScalar()
             current_p = int(round(current * 100))
