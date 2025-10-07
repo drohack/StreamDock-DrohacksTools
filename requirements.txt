@@ -3,3 +3,5 @@ Pillow==11.1.0
 Requests==2.32.3
 websocket_client==1.8.0
 pycaw==20240210
+psutil==7.1.0
+comtypes==1.4.12
