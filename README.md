@@ -105,6 +105,26 @@ pyinstaller main.spec
 
 The packaged file will be generated in the `dist` directory.
 
+## Installing to StreamDock
+
+1. Copy the built `DrohackPlugin.exe` from the `dist` directory into the plugin bundle folder:
+
+```
+com.drohack.streamdock.tools.sdPlugin/
+├── DrohackPlugin.exe       <-- copy here
+├── manifest.json
+├── propertyInspector/
+└── static/
+```
+
+2. Copy the entire `com.drohack.streamdock.tools.sdPlugin` folder to the StreamDock plugins directory:
+
+```
+%APPDATA%\HotSpot\StreamDock\plugins\
+```
+
+3. Restart the StreamDock application. Your plugin ("Drohack's Tools") should appear in the action list.
+
 ## Note
 
 If you encounter module not found errors, this is because `action_factory.py` uses `importlib.import_module` to dynamically load classes under `actions`, and `PyInstaller` statically analyzes code during packaging. PyInstaller will consider modules only used in `action` as unused and won't package them into the exe. We can directly add the relevant modules to `hiddenimports` manually to resolve this.
