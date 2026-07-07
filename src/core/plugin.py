@@ -76,7 +76,7 @@ class Plugin:
         """        
         data = json.loads(message)
         event = data.get('event')
-        Logger.info(event)
+        Logger.debug(event)
         if event == 'didReceiveGlobalSettings':
             self.global_settings = data.get('payload', {}).get('settings')
             for action in self.actions.values():

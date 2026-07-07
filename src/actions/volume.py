@@ -146,7 +146,6 @@ class Volume(Action):
 
     def on_dial_rotate(self, payload: dict):
         ticks = payload.get("ticks", 0)
-        Logger.info(f"[VolumeAction] Dial rotate ticks={ticks} payload={payload}")
         step_percent = 5  # change this to taste
         if ticks != 0:
             self.change_volume_percent(ticks * step_percent)
