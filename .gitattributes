@@ -1,0 +1,12 @@
+# Normalize line endings: text files stored as LF in the repo,
+# checked out as-is (no working-tree conversion surprises).
+* text=auto
+
+# Binary assets — never touch line endings
+*.exe binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.mp3 binary
