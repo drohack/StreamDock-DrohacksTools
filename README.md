@@ -1,10 +1,22 @@
 # Drohack's Tools for StreamDock
 
 This is buit on top of the example plugin here: https://github.com/MiraboxSpace/StreamDock-Plugin-SDK/tree/main/SDPythonSDK
-It has 2 tools working in Windows:
+It has these tools working in Windows:
 
-- Volume: Button or Knob, shows the current master volume of Windows, using the background fill & actual number. When pressed mutes master volume, and knob rotation increases/decreases volume in increments of 5.
-- Gif: Plays gifs on a button, gifs put in the /static/gifs/ folder, resizes them to 72x72. Can play Random, Shuffle (plays though all randomly without repeats), in Order (all 3 rotate every 30 seconds), or a Static gif where you choose one to play on loop.
+- **Volume**: Button or Knob, shows the current Windows master volume via background fill & number. Press mutes; knob rotation changes volume by 5.
+- **Game Volume**: Knob or Button that controls every app EXCEPT an exclude list (Discord by default), so game/media volume is independent of voice chat. It never touches Windows master. Absolute mode — all non-excluded apps track the knob and newly launched apps conform. All Game Volume keys share one level (edit the exclude list in the property inspector). Press mutes those apps.
+- **App Volume**: Controls one selected app's volume (chosen in the property inspector).
+- **Discord Voice**: Knob for Discord's voice output volume (0–200, Discord's native range; 100 = normal, above = boost). Press to deafen. Uses Discord's local RPC so it works whenever Discord is running — no audio session needed — and stays in sync with changes made in Discord itself.
+- **Discord Mute**: Button that mutes/unmutes your mic; if you're deafened, one press undeafens and unmutes. Shows the live/muted/deafened icon plus the current voice volume.
+- **Gif**: Plays gifs on a button, gifs put in the /static/gifs/ folder, resizes them to 72x72. Can play Random, Shuffle (plays though all randomly without repeats), in Order (all 3 rotate every 30 seconds), or a Static gif where you choose one to play on loop.
+
+### Discord setup (one time, for the Discord Voice / Mute actions)
+
+1. Go to https://discord.com/developers/applications and create a **New Application** (you can ignore the "verification" section — that's only for public apps in 100+ servers; local RPC works for your own account on an unverified app).
+2. On the **OAuth2** page, copy the **Client ID** and **Client Secret**, and add a redirect URL of `http://localhost`.
+3. In StreamDock, open a Discord Voice or Discord Mute key's settings, paste the Client ID + Secret, click **Save + Connect**, and approve the popup that appears inside Discord.
+
+Tokens are stored in the plugin's global settings and refresh automatically. Discord only allows one app to control voice settings at a time, so avoid using another Discord plugin's mute/deafen actions simultaneously.
 
 ## Features
 
