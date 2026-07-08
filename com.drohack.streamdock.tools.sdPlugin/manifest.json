@@ -44,28 +44,6 @@
 	  "Icon": "static/img/gif-icon.png"
     },
     {
-      "UUID": "com.drohack.streamdock.tools.app_volume",
-      "state": 0,
-      "States": [
-        {
-          "TitleAlignment": "bottom",
-          "FontSize": "5"
-        }
-      ],
-      "Settings": {},
-      "UserTitleEnabled": false,
-      "SupportedInMultiActions": false,
-      "Controllers": [
-        "Keypad",
-        "Information",
-        "Knob"
-      ],
-      "Name": "App Volume",
-      "Tooltip": "Control one app's volume",
-      "PropertyInspectorPath": "./propertyInspector/app_volume/index.html",
-      "Icon": "static/img/volume-icon.png"
-    },
-    {
       "UUID": "com.drohack.streamdock.tools.game_volume",
       "state": 0,
       "States": [
