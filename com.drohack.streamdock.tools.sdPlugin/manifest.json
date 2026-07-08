@@ -42,6 +42,93 @@
       "Tooltip": "Gif",
       "PropertyInspectorPath": "./propertyInspector/gif/index.html",
 	  "Icon": "static/img/gif-icon.png"
+    },
+    {
+      "UUID": "com.drohack.streamdock.tools.app_volume",
+      "state": 0,
+      "States": [
+        {
+          "TitleAlignment": "bottom",
+          "FontSize": "5"
+        }
+      ],
+      "Settings": {},
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": [
+        "Keypad",
+        "Information",
+        "Knob"
+      ],
+      "Name": "App Volume",
+      "Tooltip": "Control one app's volume",
+      "PropertyInspectorPath": "./propertyInspector/app_volume/index.html",
+      "Icon": "static/img/volume-icon.png"
+    },
+    {
+      "UUID": "com.drohack.streamdock.tools.game_volume",
+      "state": 0,
+      "States": [
+        {
+          "TitleAlignment": "center",
+          "FontSize": "16"
+        }
+      ],
+      "Settings": {},
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": [
+        "Keypad",
+        "Information",
+        "Knob"
+      ],
+      "Name": "Game Volume",
+      "Tooltip": "Volume for everything except excluded apps (e.g. Discord)",
+      "PropertyInspectorPath": "./propertyInspector/game_volume/index.html",
+      "Icon": "static/img/game-volume-icon.png"
+    },
+    {
+      "UUID": "com.drohack.streamdock.tools.discord_voice",
+      "state": 0,
+      "States": [
+        {
+          "TitleAlignment": "center",
+          "FontSize": "16"
+        }
+      ],
+      "Settings": {},
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": [
+        "Keypad",
+        "Information",
+        "Knob"
+      ],
+      "Name": "Discord Voice Volume",
+      "Tooltip": "Rotate: Discord voice (chat) volume. Press: deafen",
+      "PropertyInspectorPath": "./propertyInspector/discord_voice/index.html",
+      "Icon": "static/img/discord-voice-icon.png"
+    },
+    {
+      "UUID": "com.drohack.streamdock.tools.discord_mute",
+      "state": 0,
+      "States": [
+        {
+          "TitleAlignment": "bottom",
+          "FontSize": "11"
+        }
+      ],
+      "Settings": {},
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": [
+        "Keypad",
+        "Information"
+      ],
+      "Name": "Discord Mute",
+      "Tooltip": "Press: mute mic (undeafens if deafened). Shows chat volume",
+      "PropertyInspectorPath": "./propertyInspector/discord_mute/index.html",
+      "Icon": "static/img/discord-mute-icon.png"
     }
   ],
   "Version": "0.0.1",

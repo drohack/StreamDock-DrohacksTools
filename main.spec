@@ -9,7 +9,7 @@ a = Analysis(
         ('src/actions', 'src/actions'),
         ('src/core', 'src/core')
     ],
-    hiddenimports=['websocket-client','PIL', 'PIL.Image', 'PIL.ImageDraw','requests', 'pycaw', 'pycaw.pycaw', 'comtypes', 'actions.volume', 'win32api', 'win32con', 'win32gui', 'win32process', 'pywintypes'],
+    hiddenimports=['websocket-client','PIL', 'PIL.Image', 'PIL.ImageDraw', 'PIL.ImageFont', 'PIL.ImageEnhance', 'requests', 'pycaw', 'pycaw.pycaw', 'comtypes', 'uuid', 'actions.volume', 'actions.app_volume', 'actions.gif', 'actions.game_volume', 'actions.discord_voice', 'actions.discord_mute', 'win32api', 'win32con', 'win32gui', 'win32process', 'win32file', 'win32pipe', 'pywintypes'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

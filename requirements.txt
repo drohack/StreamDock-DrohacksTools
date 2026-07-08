@@ -5,3 +5,4 @@ websocket_client==1.8.0
 pycaw==20240210
 psutil==7.1.0
 comtypes==1.4.12
+pywin32==312
