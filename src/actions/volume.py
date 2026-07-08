@@ -157,7 +157,8 @@ class Volume(Action):
 
     # Extra events to skip
     def on_did_receive_global_settings(self, settings: dict):
-        Logger.info(f"[VolumeAction] Received global settings: {settings}")
+        # don't log the payload — global settings hold Discord OAuth secrets
+        Logger.info(f"[VolumeAction] Received global settings ({len(settings or {})} keys)")
 
     def on_key_up(self, payload: dict):
         self.set_state(1)

@@ -9,6 +9,14 @@ class Timer:
         self._thread.start()
     
     def _run(self):
+        # Timer callbacks (volume/app_volume/game_volume) make COM audio calls
+        # on THIS thread. COM must be initialized per-thread, so do it once
+        # here — the actions' own CoInitialize() runs on a different thread.
+        try:
+            from comtypes import CoInitialize
+            CoInitialize()
+        except Exception:
+            pass
         while True:
             current_time = time.time()
             for uuid, data in list(self._intervals.items()):
