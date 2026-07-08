@@ -8,6 +8,7 @@ from src.core.action import Action
 from src.core.logger import Logger
 from pycaw.pycaw import AudioUtilities
 from comtypes import CoInitialize, CoUninitialize
+from src.core.audio_sessions import sessions_for_process
 
 user32 = ctypes.windll.user32
 gdi32 = ctypes.windll.gdi32
@@ -39,15 +40,14 @@ class AppVolume(Action):
             pass
 
     # --- Get all active sessions for selected app ---
-    def update_volume_interfaces(self):
+    def update_volume_interfaces(self, force=False):
         self.volume_interfaces = []
         if not self.selected_app:
             return
         app_name = os.path.basename(self.selected_app)
-        for s in AudioUtilities.GetAllSessions():
+        for s in sessions_for_process([app_name], force=force):
             try:
-                if s.Process and os.path.basename(s.Process.name()) == app_name:
-                    self.volume_interfaces.append(s.SimpleAudioVolume)
+                self.volume_interfaces.append(s.SimpleAudioVolume)
             except Exception as e:
                 Logger.warning(f"[AppVolume] update_volume_interfaces - Error accessing session process: {e}")
                 continue
@@ -239,25 +239,41 @@ class AppVolume(Action):
 
     # --- Volume controls ---
     def change_volume_percent(self, delta_percent):
-        try:
-            for v in self.volume_interfaces:
-                current = v.GetMasterVolume()
-                new_val = max(0.0, min(1.0, current + delta_percent / 100.0))
-                v.SetMasterVolume(new_val, None)
-            self.update_volume_display()
-        except Exception as e:
-            Logger.error(f"[AppVolume] change_volume_percent error: {e}")
+        """Retries once with a fresh session enumeration so a stale session
+        object doesn't swallow a dial tick."""
+        for attempt in range(2):
+            try:
+                if attempt > 0 or not self.volume_interfaces:
+                    self.update_volume_interfaces(force=True)
+                for v in self.volume_interfaces:
+                    current = v.GetMasterVolume()
+                    new_val = max(0.0, min(1.0, current + delta_percent / 100.0))
+                    v.SetMasterVolume(new_val, None)
+                self.update_volume_display()
+                return
+            except Exception as e:
+                if attempt == 0:
+                    Logger.warning(f"[AppVolume] change_volume_percent retrying after: {e}")
+                else:
+                    Logger.error(f"[AppVolume] change_volume_percent error: {e}")
 
     def mute_toggle(self):
-        try:
-            if not self.volume_interfaces:
+        for attempt in range(2):
+            try:
+                if attempt > 0 or not self.volume_interfaces:
+                    self.update_volume_interfaces(force=True)
+                if not self.volume_interfaces:
+                    return
+                any_muted = all(v.GetMute() for v in self.volume_interfaces)
+                for v in self.volume_interfaces:
+                    v.SetMute(0 if any_muted else 1, None)
+                self.update_volume_display()
                 return
-            any_muted = all(v.GetMute() for v in self.volume_interfaces)
-            for v in self.volume_interfaces:
-                v.SetMute(0 if any_muted else 1, None)
-            self.update_volume_display()
-        except Exception as e:
-            Logger.error(f"[AppVolume] mute_toggle error: {e}")
+            except Exception as e:
+                if attempt == 0:
+                    Logger.warning(f"[AppVolume] mute_toggle retrying after: {e}")
+                else:
+                    Logger.error(f"[AppVolume] mute_toggle error: {e}")
 
     # --- Event hooks ---
     def on_property_inspector_did_appear(self, payload: dict):

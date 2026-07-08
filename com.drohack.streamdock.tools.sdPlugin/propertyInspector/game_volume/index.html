@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Drohack's Tools - Game Volume</title>
+  <link rel="stylesheet" href="../../static/css/sdpi.css" />
+  <script src="../../static/utils/common.js"></script>
+  <script src="../../static/action.js"></script>
+  <script src="index.js" defer></script>
+</head>
+
+<body>
+  <div class="sdpi-wrapper">
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Excluded apps</div>
+      <div class="sdpi-item-value">
+        <select id="exclude_list" multiple size="6" style="width:100%">
+          <option value="">Loading...</option>
+        </select>
+      </div>
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label"></div>
+      <div class="sdpi-item-value" style="font-size:8pt;color:#999">
+        Ctrl+click to select multiple. The knob controls every app EXCEPT the
+        selected ones (default: Discord). Excluded apps keep their own volume.
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
