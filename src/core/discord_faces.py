@@ -8,7 +8,7 @@ functions only, so ActionFactory's Action-subclass scan finds nothing here.
 import base64
 import io
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFont
 
 from . import discord_icons
 
@@ -16,6 +16,7 @@ SIZE = 108
 
 WHITE = (255, 255, 255, 255)
 GRAY = (120, 120, 120, 255)
+BOOST = (255, 176, 32, 225)  # amber overfill for the 100-200 boost range
 DIM = 0.28  # brightness of the icon above the volume fill line
 
 # Short labels for non-ready connection states (drawn as the key title)
@@ -45,6 +46,19 @@ def _load_icon(b64):
     if b64 not in _icon_cache:
         _icon_cache[b64] = Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGBA")
     return _icon_cache[b64]
+
+
+_glyph_cache = {}
+
+
+def _glyph_mask(b64):
+    """Mask of the white glyph (mic/headphones) inside the icon — the near-white
+    pixels — so it can be re-asserted on top of the boost overfill."""
+    if b64 not in _glyph_cache:
+        icon = _load_icon(b64)
+        bright = icon.convert("L").point(lambda p: 255 if p > 200 else 0)
+        _glyph_cache[b64] = ImageChops.multiply(bright, icon.getchannel("A"))
+    return _glyph_cache[b64]
 
 
 def _to_data_url(img: Image.Image) -> str:
@@ -82,15 +96,31 @@ def state_face() -> str:
 
 def icon_face(kind: str, volume: float) -> str:
     """Authentic Discord icon (mic / muted / deafened) rendered as a volume
-    gauge: the icon's colored background (blue when live, red when muted or
-    deafened) is bright up to the volume level and dimmed above it, so the
-    fill rises/falls with the percentage. Volume number in the corner."""
+    gauge. 0-100 fills the circle in the state color (blue when live, red when
+    muted/deafened); 100-200 overfills the full circle with the amber BOOST
+    color rising from the bottom again. Volume number in the corner."""
     icon = _load_icon(ICON_FOR[kind])
     result = ImageEnhance.Brightness(icon).enhance(DIM)  # dim "empty" gauge
-    fill_h = int(max(0.0, min(volume, 200.0)) / 200.0 * SIZE)
-    if fill_h > 0:
-        y0 = SIZE - fill_h
+    v = max(0.0, min(volume, 200.0))
+
+    # 0-100: bright state-color fill, full circle at 100
+    h1 = int(min(v, 100.0) / 100.0 * SIZE)
+    if h1 > 0:
+        y0 = SIZE - h1
         region = icon.crop((0, y0, SIZE, SIZE))
-        result.paste(region, (0, y0), region)  # bright fill from the bottom up
+        result.paste(region, (0, y0), region)
+
+    # 100-200: amber boost overfill, clipped to the circle via the icon's alpha
+    if v > 100.0:
+        h2 = int((v - 100.0) / 100.0 * SIZE)
+        if h2 > 0:
+            y0 = SIZE - h2
+            box = (0, y0, SIZE, SIZE)
+            accent = Image.new("RGBA", (SIZE, SIZE), BOOST)
+            result.paste(accent.crop(box), (0, y0), icon.getchannel("A").crop(box))
+            # keep the white glyph crisp on top of the amber
+            white = Image.new("RGBA", (SIZE, SIZE), WHITE)
+            result.paste(white.crop(box), (0, y0), _glyph_mask(ICON_FOR[kind]).crop(box))
+
     _draw_volume_number(ImageDraw.Draw(result), volume)
     return _to_data_url(result)

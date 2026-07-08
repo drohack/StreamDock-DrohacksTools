@@ -6,6 +6,8 @@ running; no Windows audio session required.
 Press (dial or key): toggle deafen.
 """
 
+import time
+
 from src.core.action import Action
 from src.core.logger import Logger
 from src.core.discord_rpc import get_discord_rpc, READY
@@ -15,11 +17,14 @@ from src.core import discord_faces
 class DiscordVoice(Action):
     STEP = 5.0
     MAX_VOLUME = 200.0
+    NORMAL_MAX = 100.0
+    HOLD_S = 1.0  # pause at 100 when turning up before entering the boost range
 
     def __init__(self, action: str, context: str, settings: dict, plugin):
         super().__init__(action, context, settings, plugin)
         self._pi_visible = False
         self._last_face = None
+        self._hold_until = 0.0
         self.rpc = get_discord_rpc(plugin)
         self.rpc.acquire(self._on_rpc_status)
         self._render(self.rpc.status())
@@ -68,7 +73,26 @@ class DiscordVoice(Action):
         if not ticks or self.rpc.state != READY:
             return
         current = self.rpc.voice_snapshot()["output_volume"]
-        target = max(0.0, min(self.MAX_VOLUME, current + ticks * self.STEP))
+        now = time.monotonic()
+        at_100 = abs(current - self.NORMAL_MAX) < 0.5
+
+        # Sticky detent: while sitting at 100, up-ticks are blocked until the
+        # hold elapses. Turning down is never blocked.
+        if ticks > 0 and at_100 and now < self._hold_until:
+            return
+
+        target = current + ticks * self.STEP
+        if ticks > 0 and current < self.NORMAL_MAX and target > self.NORMAL_MAX:
+            target = self.NORMAL_MAX  # stop on 100 when crossing up
+        target = max(0.0, min(self.MAX_VOLUME, target))
+        if target == current:
+            return
+
+        # arriving on 100 (from either direction) starts the pause, so the next
+        # up-tick has to wait before entering the boost range
+        if abs(target - self.NORMAL_MAX) < 0.5 and not at_100:
+            self._hold_until = now + self.HOLD_S
+
         # optimistic: face updates instantly, sender coalesces the IPC writes
         self.rpc.set_local_voice({"output_volume": target})
         self.rpc.queue_voice_patch({"output": {"volume": float(target)}})
