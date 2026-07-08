@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Drohack's Tools - Discord Voice Volume</title>
+  <link rel="stylesheet" href="../../static/css/sdpi.css" />
+  <script src="../../static/utils/common.js"></script>
+  <script src="../../static/action.js"></script>
+  <script src="../discord_shared.js" defer></script>
+</head>
+
+<body>
+  <div class="sdpi-wrapper">
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Status</div>
+      <div class="sdpi-item-value" id="discord_status">…</div>
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Client ID</div>
+      <input class="sdpi-item-value" id="client_id" placeholder="Discord application client ID" />
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Client Secret</div>
+      <input class="sdpi-item-value" id="client_secret" type="password" placeholder="Discord application client secret" />
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label"></div>
+      <button class="sdpi-item-value" id="connect_btn">Save + Connect</button>
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label"></div>
+      <button class="sdpi-item-value" id="forget_btn">Forget authorization</button>
+    </div>
+    <details class="sdpi-item">
+      <summary>How to set up</summary>
+      <p>1. Go to discord.com/developers/applications and create a New Application.</p>
+      <p>2. On the OAuth2 page: copy the Client ID and Client Secret, and add redirect URL <b>http://localhost</b>.</p>
+      <p>3. Paste both here, click Save + Connect, then approve the popup inside Discord.</p>
+      <p>Rotate = chat (voice) volume. Press = deafen/undeafen.</p>
+    </details>
+  </div>
+</body>
+
+</html>

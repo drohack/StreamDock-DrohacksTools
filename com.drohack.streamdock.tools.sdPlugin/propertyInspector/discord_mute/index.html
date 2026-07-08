@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Drohack's Tools - Discord Mute</title>
+  <link rel="stylesheet" href="../../static/css/sdpi.css" />
+  <script src="../../static/utils/common.js"></script>
+  <script src="../../static/action.js"></script>
+  <script src="../discord_shared.js" defer></script>
+</head>
+
+<body>
+  <div class="sdpi-wrapper">
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Status</div>
+      <div class="sdpi-item-value" id="discord_status">…</div>
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Client ID</div>
+      <input class="sdpi-item-value" id="client_id" placeholder="Discord application client ID" />
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Client Secret</div>
+      <input class="sdpi-item-value" id="client_secret" type="password" placeholder="Discord application client secret" />
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label"></div>
+      <button class="sdpi-item-value" id="connect_btn">Save + Connect</button>
+    </div>
+    <div class="sdpi-item">
+      <div class="sdpi-item-label"></div>
+      <button class="sdpi-item-value" id="forget_btn">Forget authorization</button>
+    </div>
+    <details class="sdpi-item">
+      <summary>How it works</summary>
+      <p>Press = mute/unmute your mic. If you are deafened, one press undeafens AND unmutes.</p>
+      <p>The number on the key is the current chat (voice) volume.</p>
+      <p>Credentials are shared with the Discord voice knob — set them up once on either.</p>
+    </details>
+  </div>
+</body>
+
+</html>
