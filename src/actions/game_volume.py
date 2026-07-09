@@ -1,6 +1,13 @@
 """Game Volume: controls every app's mixer session EXCEPT an exclude list
 (default: Discord), so game/media volume is independent of voice chat.
 
+Discord carve-out: Discord renders voice from its renderer process but plays
+everything else (chat videos, pings, UI beeps) through a separate Chromium
+audio-service session — so only the voice session is excluded and the media
+session follows game volume like any other app (see VOICE_SPLIT_APPS in
+audio_sessions.py). If the process layout can't be identified, all Discord
+sessions stay excluded (voice-safe fallback).
+
 All Game Volume keys (knob, buttons) share ONE level via a module-level
 controller — otherwise multiple instances would each store and re-assert their
 own level every tick and fight each other. The controller owns a single
@@ -19,7 +26,7 @@ from comtypes import CoInitialize, CoUninitialize
 
 from src.core.action import Action
 from src.core.logger import Logger
-from src.core.audio_sessions import sessions_excluding, get_all_sessions
+from src.core.audio_sessions import sessions_excluding, get_all_sessions, is_audio_service
 
 DEFAULT_EXCLUDE = ["Discord.exe"]
 
@@ -127,7 +134,13 @@ class _GameVolumeController:
                     names = []
                     for s in sessions:
                         try:
-                            names.append(os.path.basename(s.Process.name()) if s.Process else "system")
+                            if s.Process:
+                                name = os.path.basename(s.Process.name())
+                                if is_audio_service(s):
+                                    name += "(media)"
+                                names.append(name)
+                            else:
+                                names.append("system")
                         except Exception:
                             names.append("?")
                     Logger.info(f"[GameVolume] applying level={level} muted={muted} to {len(sessions)} sessions: {names}")

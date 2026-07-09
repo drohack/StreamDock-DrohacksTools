@@ -6,8 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Windows-only StreamDock (Mirabox) plugin — "Drohack's Tools" — built on the official Python SDK example. Actions:
 - **volume** — Windows master volume knob/button.
-- **game_volume** — sets every app's mixer session EXCEPT an exclude list (default Discord), so game/media volume is independent of voice chat. Windows master is never touched.
-- **app_volume** — one selected app's volume.
+- **game_volume** — sets every app's mixer session EXCEPT an exclude list (default Discord), so game/media volume is independent of voice chat. Windows master is never touched. Discord carve-out: Discord renders voice from its `--type=renderer` process but plays everything else (chat videos, pings, UI beeps) through its Chromium `audio.mojom.AudioService` utility process — only the voice session is excluded; the media session follows game volume. Discrimination is by process cmdline (`is_audio_service()` in `src/core/audio_sessions.py`, per-PID cached, scoped by `VOICE_SPLIT_APPS` — Discord only, since generic Chromium apps route ALL audio through the audio service). Any cmdline failure falls back to excluding all Discord sessions (voice-safe).
 - **discord_voice** — Discord voice output volume (rotate) + deafen (press), via Discord's local RPC. Works whenever Discord runs, no audio session needed.
 - **discord_mute** — Discord mic mute (press); undeafen+unmute when deafened.
 - **gif** — plays gifs on a key.
