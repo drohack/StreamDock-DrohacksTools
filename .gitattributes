@@ -2,7 +2,7 @@
 # checked out as-is (no working-tree conversion surprises).
 * text=auto
 
-# Binary assets — never touch line endings
+# Binary assets: never touch line endings
 *.exe binary
 *.png binary
 *.jpg binary
@@ -10,3 +10,7 @@
 *.ico binary
 *.ttf binary
 *.mp3 binary
+
+# Vendor plugin snapshots stay byte-exact: the upstream originals mix CRLF and
+# LF, and each .patch only applies to an install with those exact endings.
+vendor/*.sdPlugin/** -text

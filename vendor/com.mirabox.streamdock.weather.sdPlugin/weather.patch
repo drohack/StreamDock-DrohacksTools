@@ -1,0 +1,281 @@
+--- a/plugin/index.js
++++ b/plugin/index.js
+@@ -134,6 +134,44 @@
+   return null;
+ }
+ 
++/**
++ * Draws the weather name and temperature into the image below the icon, for the
++ * "None" display option. setTitle cannot change the font size, so this is the
++ * only way to let the temperature grow into the line the city name would use.
++ * Font family and color follow the key's title settings. The text is always
++ * bold because StreamDock draws key titles bold even when the style is Regular.
++ */
++function drawReading(ctx, weatherName, tempText, titleParameters) {
++  const tp = titleParameters || {};
++  const style = (tp.fontStyle || "").toLowerCase();
++  const font = (px) =>
++    `${style.includes("italic") ? "italic " : ""}bold ${px}px "${tp.fontFamily || "Microsoft YaHei"}", sans-serif`;
++  // Largest font whose ink fits the 480px-wide box between top and bottom,
++  // centered vertically for when the width is the limit.
++  const fit = (text, top, bottom) => {
++    ctx.font = font(100);
++    const m = ctx.measureText(text);
++    const inkHeight = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
++    ctx.font = font(Math.floor(100 * Math.min(480 / m.width, (bottom - top) / inkHeight)));
++    const s = ctx.measureText(text);
++    ctx.fillText(text, 256, (top + bottom + s.actualBoundingBoxAscent - s.actualBoundingBoxDescent) / 2);
++  };
++
++  ctx.save();
++  ctx.fillStyle = tp.titleColor || "#ffffff";
++  ctx.textAlign = "center";
++  ctx.textBaseline = "alphabetic";
++  // Localized names can hold "\n" (e.g. "Clear\nat night"); one line reads better here.
++  const nameLine = (weatherName || "").replace(/\n/g, " ");
++  if (nameLine) {
++    fit(nameLine, 292, 348);
++    fit(tempText, 364, 496);
++  } else {
++    fit(tempText, 300, 496);
++  }
++  ctx.restore();
++}
++
+ const $local = false,
+   $plugin = {
+     name: "weather",
+@@ -175,6 +213,7 @@
+               data.searchList = [];
+               this.canvasFunc(context, device, "error");
+               $websocket.setSettings(context, data);
++              this.scheduleRetry(context, device, "queryLocation");
+             } else if (locationList && locationList.length > 0) {
+               // 网关返回的是包含城市信息的数组，每一项已归一化为 { id: geonameId, name: 本地化名称 }
+               data.searchList = locationList;
+@@ -194,6 +233,7 @@
+             return;
+           }
+           this.canvasFunc(context, device, "error");
++          this.scheduleRetry(context, device, "queryLocation");
+         }
+       },
+       async queryWeather(context, device) {
+@@ -227,6 +267,7 @@
+           if (error) {
+             console.error("queryWeather failed:", error);
+             this.canvasFunc(context, device, "error");
++            this.scheduleRetry(context, device, "queryWeather");
+           } else if (weatherData && weatherData.data && weatherData.data.current) {
+             // 网关返回 { data: { location, current }, meta: {...} }
+             const current = weatherData.data.current;
+@@ -240,12 +281,13 @@
+             data.count = 0;
+             data.timer = setTimeout(
+               () => this.queryWeather(context, device),
+-              1000 * 60 * 60 * 2 // 每两个小时自动更新一次
++              1000 * 60 * 10
+             );
+             $websocket.setSettings(context, data);
+             this.canvasFunc(context, device);
+           } else {
+             this.canvasFunc(context, device, "error");
++            this.scheduleRetry(context, device, "queryWeather");
+           }
+         } catch (e) {
+           console.error("queryWeather general error:", e);
+@@ -255,8 +297,19 @@
+             return;
+           }
+           this.canvasFunc(context, device, "error");
++          this.scheduleRetry(context, device, "queryWeather");
+         }
+       },
++      // The refresh timer is only re-armed on success, so without this one
++      // failed fetch would stop the key updating until it is pressed.
++      scheduleRetry(context, device, method, delay = 1000 * 60 * 5) {
++        const data = this.data[context];
++        clearTimeout(data.timer);
++        data.timer = setTimeout(() => {
++          data.count = 0;
++          this[method](context, device);
++        }, delay);
++      },
+       // 绘制
+       async canvasFunc(context, device, status = "success") {
+         if (status === "error") {
+@@ -317,11 +370,16 @@
+             ctx.drawImage(icon, (512 - drawW) / 2, 20 + (size - drawH) / 2, drawW, drawH);
+           }
+ 
+-          const weatherName = data.radio2 == "0" ? (localizedName || name) + "\n" : '';
+-          $websocket.setTitle(
+-            context,
+-            weatherName + (data.radio == "0" ? `${Number(tmps).toFixed(1)}${unit}\n${cityName}` : `${Number(tmps).toFixed(1)}${unit}\n${data.title}`)
+-          );
++          if (data.radio == "2") {
++            drawReading(ctx, data.radio2 == "0" ? localizedName || name : "", `${Number(tmps).toFixed(1)}${unit}`, data.titleParameters);
++            $websocket.setTitle(context, "");
++          } else {
++            const weatherName = data.radio2 == "0" ? (localizedName || name) + "\n" : '';
++            $websocket.setTitle(
++              context,
++              weatherName + (data.radio == "0" ? `${Number(tmps).toFixed(1)}${unit}\n${cityName}` : `${Number(tmps).toFixed(1)}${unit}\n${data.title}`)
++            );
++          }
+ 
+           $websocket.setImage(context, canvas.toDataURL("image/png"));
+         };
+--- a/propertyInspector/action1/index.html
++++ b/propertyInspector/action1/index.html
+@@ -70,6 +70,10 @@
+           <input name="rdio" id="rdio2" type="radio" value="1" />
+           <label for="rdio2" class=""><span></span>自定义标题</label>
+         </span>
++        <span class="sdpi-item-child">
++          <input name="rdio" id="rdio5" type="radio" value="2" />
++          <label for="rdio5" class=""><span></span>无</label>
++        </span>
+       </div>
+     </div>
+     <div class="sdpi-item" id="titleWrap">
+--- a/propertyInspector/action1/index.js
++++ b/propertyInspector/action1/index.js
+@@ -39,7 +39,7 @@
+             $dom.inputTitle.value = $settings.title || '';
+             $dom.themeList.value = $settings.theme || 'Modern';
+             $dom.searchList.value = $settings.cityId || '';
+-            titleWrap.style.display = ($settings.radio || '0') == '0' ? 'none' : 'flex';
++            titleWrap.style.display = ($settings.radio || '0') == '1' ? 'flex' : 'none';
+             $dom.radio.forEach(item =>
+                 item.checked = item.value === ($settings.radio || '0') ? true : false);
+             $dom.radio2.forEach(item =>
+@@ -52,7 +52,7 @@
+ $dom.radio.forEach(item => item.on('change', function () {
+     $settings.radio = this.value;
+     $websocket.sendToPlugin({ radio: this.value });
+-    titleWrap.style.display = this.value == '0' ? 'none' : 'flex';
++    titleWrap.style.display = this.value == '1' ? 'flex' : 'none';
+ }));
+ 
+ $dom.radio2.forEach(item => item.on('change', function () {
+--- a/ar.json
++++ b/ar.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "الاستعلام عن الطقس",
+     "Localization": {
++        "无": "لا شيء",
+         "天气查询": "الاستعلام عن الطقس",
+         "输入城市": "أدخل المدينة",
+         "搜索列表": "قائمة البحث",
+--- a/de.json
++++ b/de.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "Wetterabfrage",
+     "Localization": {
++        "无": "Keine",
+         "天气查询": "Wetterabfrage",
+         "输入城市": "Stadt betreten",
+         "搜索列表": "Suchliste",
+--- a/en.json
++++ b/en.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "Weather query",
+     "Localization": {
++        "无": "None",
+         "天气查询": "Weather query",
+         "输入城市": "Enter city",
+         "搜索列表": "search list",
+--- a/es.json
++++ b/es.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "Consulta meteorológica",
+     "Localization": {
++        "无": "Ninguno",
+         "天气查询": "Consulta meteorológica",
+         "输入城市": "Introduce la ciudad",
+         "搜索列表": "lista de búsqueda",
+--- a/fr.json
++++ b/fr.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "Requête météo",
+     "Localization": {
++        "无": "Aucun",
+         "天气查询": "Requête météo",
+         "输入城市": "Entrez la ville",
+         "搜索列表": "liste de recherche",
+--- a/it.json
++++ b/it.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "Domanda sul meteo",
+     "Localization": {
++        "无": "Nessuno",
+         "天气查询": "Domanda sul meteo",
+         "输入城市": "Inserisci la città",
+         "搜索列表": "elenco di ricerca",
+--- a/ja.json
++++ b/ja.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "天気クエリ",
+     "Localization": {
++        "无": "なし",
+         "天气查询": "天気クエリ",
+         "输入城市": "都市を入力してください",
+         "搜索列表": "検索リスト",
+--- a/ko.json
++++ b/ko.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "날씨 쿼리",
+     "Localization": {
++        "无": "없음",
+         "天气查询": "날씨 쿼리",
+         "输入城市": "도시를 입력하세요",
+         "搜索列表": "검색 목록",
+--- a/pl.json
++++ b/pl.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "Weather query",
+     "Localization": {
++        "无": "Brak",
+         "天气查询": "Weather query",
+         "输入城市": "Enter city",
+         "搜索列表": "search list",
+--- a/pt.json
++++ b/pt.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "Consulta meteorológica",
+     "Localization": {
++        "无": "Nenhum",
+         "天气查询": "Consulta meteorológica",
+         "输入城市": "Digite a cidade",
+         "搜索列表": "lista de pesquisa",
+--- a/ru.json
++++ b/ru.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "Запрос погоды",
+     "Localization": {
++        "无": "Нет",
+         "天气查询": "Запрос погоды",
+         "输入城市": "Введите город",
+         "搜索列表": "список поиска",
+--- a/zh_CN.json
++++ b/zh_CN.json
+@@ -7,6 +7,7 @@
+     },
+     "Category": "天气查询",
+     "Localization": {
++        "无": "无",
+         "天气查询": "天气查询",
+         "输入城市": "输入城市",
+         "搜索列表": "搜索列表",
